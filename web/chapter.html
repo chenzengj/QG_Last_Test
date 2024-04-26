@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+  <title>创建章节</title>
+</head>
+<body>
+<!-- 创建新章节的模态框 -->
+<div class="container">
+    <h1>创建新章节</h1>
+    <p id="courseId"></p>
+
+        <form id="newChapterForm">
+            <div class="form-group">
+                <label for="chapterName">章节标题:</label>
+                <input type="text" id="chapterName" name="chapterName" required>
+            </div>
+            <div class="form-group">
+                <label for="chapterContent">章节内容:</label>
+                <textarea id="chapterContent" name="chapterContent"></textarea>
+            </div>
+<!--            <input type="hidden" id="courseId" name="courseId" value=""> &lt;!&ndash; 课程ID &ndash;&gt;-->
+            <button id="creat" onclick="createChapter(event)">创建章节</button>
+            <!-- 按钮组容器 -->
+            <div id="buttonGroup" style="display: none;">
+                <button onclick="continueCreate(event)">继续创建</button>
+                <button onclick="goBack(event)">返回</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    function createChapter(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        // 解析 URL 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('courseId');
+    const chapterData = JSON.stringify({
+        "title": $('#chapterName').val(),
+        "content": $('#chapterContent').val(),
+        "courseId":courseId
+    });
+
+    $.ajax({
+        url: "http://localhost:8080/QG_LAST_Web_exploded/course/creatChapter",
+        type: "POST",
+        contentType: "application/json;charset=UTF-8",
+        data: chapterData,
+        success: function(response) {
+            if (response.success) {
+                //$("#message").html("<p>" + response.message + "</p>");
+                alert(response.message);
+                // 显示按钮组容器
+                $('#buttonGroup').show();
+                $('#creat').hide();
+                // setTimeout(function() {
+                //     window.location.href = "teacher.html";
+                // }, 2000);
+            } else {
+                alert(response.message);
+                // $("#message").html("<p>" + response.message + "</p>");
+            }
+        },
+        error: function() {
+            $("#message").html("<p>发生错误,请重试</p>");
+        }
+    });
+}
+    function goBack(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        //1s后跳转到其他页面
+        setTimeout(function() {
+            window.location.href = "showCourse.html";
+        }, 1000);
+    }
+    function continueCreate(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+        window.location.href = "chapter.html"
+    }
+</script>
+</body>
+</html>

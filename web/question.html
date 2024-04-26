@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加问题</title>
+</head>
+<body>
+<!-- 添加问题的模态框 -->
+<div id="addQuestionModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>添加新问题</h2>
+        <form id="addQuestionForm">
+            <div class="form-group">
+                <label for="courseSelect">选择课程:</label>
+                <select id="courseSelect">
+                    <!-- 课程列表将在此处渲染 -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="chapterSelect">选择章节:</label>
+                <select id="chapterSelect">
+                    <!-- 章节列表将在此处渲染 -->
+                </select>
+
+            </div>
+            <div class="form-group">
+                <label for="questionType">问题类型:</label>
+                <select id="questionType">
+                    <option value="blank">填空题</option>
+                    <option value="choice">选择题</option>
+                    <option value="essay">简答题</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="questionText">问题内容:</label>
+                <textarea id="questionText" name="questionText" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="answerText">问题答案:</label>
+                <textarea id="answerText" name="answerText" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="score">分值(数字):</label>
+                <textarea id="score" name="score" required></textarea>
+            </div>
+            <div class="form-group" id="choiceOptionsGroup" style="display: none;">
+                <label>选项:</label>
+                <ul id="choiceOptionsList">
+                    <li>
+                        <input type="text" class="option-input" placeholder="输入选项" />
+                        <input type="radio" name="correctAnswer" class="correct-answer" value="0" />
+                    </li>
+                </ul>
+                <button type="button" onclick="addChoiceOption()">添加选项(最多4个)</button>
+            </div>
+            <!-- 其他问题属性的输入字段 -->
+            <button type="button" onclick="addQuestion()">添加问题</button>
+        </form>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="http://localhost:8080/QG_LAST_Web_exploded/course/getAllCourses"></script>
+<script>
+    // 获取课程选择的 select 元素
+    const courseSelect = $('#courseSelect');
+
+    // 清空之前的选项
+    courseSelect.empty();
+
+    // 遍历课程集合，为每个课程创建一个 option 标签，并添加到 select 元素中
+    courses.forEach(course => {
+        $('<option>')
+            .val(course.id) // 设置 option 的值为课程的 id
+            .text(course.name) // 设置 option 的文本内容为课程的名称
+            .appendTo(courseSelect); // 添加 option 到 select 元素中
+        // 获取对应的章节集合
+        const chapters = course.chapters;
+
+        // 获取章节选择的 select 元素
+        const chapterSelect = $('#chapterSelect');
+        // 清空之前的选项
+        $('#chapterSelect').empty();
+
+// 遍历章节集合，为每个章节创建一个 option 标签，并添加到 select 元素中
+        chapters.forEach(chapter => {
+            $('<option>')
+                .val(chapter.id) // 设置 option 的值为章节的 id
+                .text(chapter.title) // 设置 option 的文本内容为章节的标题
+                .appendTo('#chapterSelect'); // 添加 option 到 select 元素中
+        });
+    });
+    $('#questionType').change(function() {
+        const questionType = $(this).val();
+        if (questionType === 'choice') {
+            $('#choiceOptionsGroup').show();
+        } else {
+            $('#choiceOptionsGroup').hide();
+        }
+    });
+    let optionCounter = 1;
+
+    function addChoiceOption() {
+        const optionsList = $('#choiceOptionsList');
+        const newOption = `
+    <li>
+      <input type="text" class="option-input" placeholder="输入选项" />
+      <input type="radio" name="correctAnswer" class="correct-answer" value="${optionCounter}" />
+    </li>
+  `;
+        optionsList.append(newOption);
+        optionCounter++;
+    }
+
+    function getChoiceOptions() {
+        const options = [];
+        const correctAnswer = $('input[name="correctAnswer"]:checked').val();
+
+        $('.option-input').each(function() {
+            const optionText = $(this).val().trim();
+            if (optionText) {
+                options.push(optionText);
+            }
+        });
+
+        return { options, correctAnswer };
+    }
+    function addQuestion() {
+        const questionType = $('#questionType').val();
+        const questionData = {
+            text: $('#questionText').val(),
+            type: questionType,
+            chapterId: $('#chapterSelect').val(),
+            answer:$('#answerText').val(),
+            score:$('#score').val()
+        };
+
+        if (questionType === 'choice') {
+            const choiceOptions = getChoiceOptions();
+            questionData.options = choiceOptions.options;
+            questionData.answer = choiceOptions.correctAnswer;
+        }
+
+        $.ajax({
+            url: 'http://localhost:8080/QG_LAST_Web_exploded/course/setQuestion',
+            type: 'POST',
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify(questionData),
+            success: function(response) {
+                if (response.success) {
+                  alert(response.message);
+                   // $("#result").html("<p>" + response.message + "</p>");
+                } else {
+                    alert(response.message);
+                    //$("#result").html("<p>" + response.message + "</p>");
+                }
+            },
+            error: function() {
+                alert("发生错误！请重试");
+                //$("#result").html("<p>发生错误,请重试</p>");
+            }
+        });
+    }
+</script>
+</body>
+</html>

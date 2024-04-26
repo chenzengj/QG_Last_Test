@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+    <title>注册</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<h1>注册</h1>
+<form>
+    <label>
+        姓名:
+        <input type="text" id="name" required>
+    </label>
+    <br>
+    <label>
+        密码:
+        <input type="password" id="password" required>
+    </label>
+    <br>
+    <label>
+        身份:
+        <select id="role">
+            <option value="student">学生</option>
+            <option value="teacher">教师</option>
+        </select>
+    </label>
+    <br>
+    <button type="button" onclick="register()">注册</button>
+</form>
+<div id="message"></div>
+
+<script>
+    function register() {
+        let name = $("#name").val();
+        let password = $("#password").val();
+        let role = $("#role").val();
+
+        let data = JSON.stringify({
+            "name": name,
+            "password": password,
+            "role": role
+        });
+
+        $.ajax({
+            url: "http://localhost:8080/QG_LAST_Web_exploded/myServlet/register",
+            type: "POST",
+            data: data,
+            contentType: "application/json;charset=UTF-8",
+            success: function(response) {
+                if (response.success) {
+                    $("#message").html("<p>" + response.message + "</p>");
+                    setTimeout(function() {
+                        window.location.href = "login.html";
+                    }, 2000);
+                } else {
+                    $("#message").html("<p>" + response.message + "</p>");
+                }
+            },
+            error: function() {
+                $("#message").html("<p>发生错误,请重试</p>");
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看答题情况和历史记录</title>
+    <style>
+        /* 添加一些样式来美化页面 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+        }
+        #answerHistory {
+            margin-top: 20px;
+        }
+        #answerHistory table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #answerHistory table th, #answerHistory table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>查看答题情况和历史记录</h1>
+
+<h2>答题情况</h2>
+<div id="answerStatus">
+    <!-- 答题情况将显示在这里 -->
+</div>
+
+<h2>历史记录</h2>
+<div id="answerHistory">
+    <!-- 答题历史记录将显示在这里 -->
+    <table>
+        <thead>
+        <tr>
+            <th>题目</th>
+            <th>答案</th>
+            <th>是否正确</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 答题历史记录的内容将通过 JavaScript 动态添加 -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+
+
+
+    // 在页面加载完成后执行初始化操作
+    window.onload = function() {
+
+        displayAnswerHistory();
+
+    };
+
+    // 展示答题情况
+    function displayAnswerStatus(answerStatus) {
+
+        const answerStatusContainer = document.getElementById('answerStatus');
+        answerStatusContainer.innerHTML = `
+                <p>总共题目数：${answerStatus.totalQuestions}</p>
+                <p>正确答案数：${answerStatus.correctAnswers}</p>
+                <p>错误答案数：${answerStatus.incorrectAnswers}</p>
+            `;
+    }
+    let total=0;
+    let correct=0;
+    let incorrect=0;
+    // 展示答题历史记录
+    function displayAnswerHistory() {
+
+        fetch('http://localhost:8080/QG_LAST_Web_exploded/course/getAnswerSituation')
+            .then(response => response.json())
+
+            .then(answers=>{
+        const answerHistoryTable = document.querySelector('#answerHistory table tbody');
+        answers.forEach(answer => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${answer.description}</td>
+                    <td>${answer.answerText}</td>
+                    <td>${answer.correct ? '正确' : '错误'}</td>
+                `;
+
+            answerHistoryTable.appendChild(row);
+            total++;
+            if(answer.correct){
+                correct++;
+            }
+            else
+                incorrect++;
+        })
+                const answerStatus = {
+                    totalQuestions: total,
+                    correctAnswers: correct,
+                    incorrectAnswers: incorrect
+                };
+                displayAnswerStatus(answerStatus);
+            });
+    }
+
+</script>
+</body>
+</html>

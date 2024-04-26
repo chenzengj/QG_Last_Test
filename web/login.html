@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+    <title>登录</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<h1>登录</h1>
+<form>
+    <label>
+        姓名:
+        <input type="text" id="name" required>
+    </label>
+    <br>
+    <label>
+        密码:
+        <input type="password" id="password" required>
+    </label>
+    <br>
+    <button type="button" onclick="login()">登录</button>
+</form>
+<div id="message"></div>
+
+<script>
+    function login() {
+        let name = $("#name").val();
+        let password = $("#password").val();
+        if(!name||!password){
+            alert("请先输入！");
+        }
+        let data = JSON.stringify({
+            "name": name,
+            "password": password
+        });
+
+        $.ajax({
+            url: "http://localhost:8080/QG_LAST_Web_exploded/myServlet/login",
+            type: "POST",
+            data: data,
+            contentType: "application/json;charset=UTF-8",
+            success: function(response) {
+                if (response.success) {
+                    let user = response.data;
+                    if (user === "student") {
+                        $("#message").html("<p>" + response.message + "</p>");
+                        setTimeout(function() {
+                            window.location.href = "student.html";
+                        }, 2000);
+                    } else if (user === "teacher") {
+                        $("#message").html("<p>" + response.message + "</p>");
+                        setTimeout(function() {
+                            window.location.href = "teacher.html";
+                        }, 2000);
+                    }
+                } else {
+                   // $("#message").html("<p>" + response.message + "</p>");
+                    alert(response.message);
+
+                }
+            },
+            error: function() {
+                $("#message").html("<p>发生错误,请重试</p>");
+            }
+        });
+    }
+</script>
+<a href="register.html">没有账号？点击这里注册</a>
+
+</body>
+</html>

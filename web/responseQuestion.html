@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程学习</title>
+
+</head>
+<body>
+<h1>章节学习</h1>
+<h2>温馨提示：所有题目均只可提交一次答案 请谨慎提交</h2>
+<div id="courseContent">
+    <!-- 动态生成的题目组件将显示在这里 -->
+</div>
+<div id="progress">
+    <!-- 学习进度显示将在这里 -->
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const chapterId = urlParams.get('chapterId');
+    // 模拟学习进度数据
+    let totalQuestions;
+    let correctTimes=0;
+    let completedQuestions = 0;
+
+    // 在页面加载完成后执行初始化操作
+    window.onload = function() {
+        displayQuestions(chapterId);
+        updateProgress();
+    };
+
+    // 展示题目
+    function displayQuestions(chapterId) {
+        // 构建要发送的数据对象
+        const requestData = {
+            chapterId: chapterId
+        };
+// 发起请求将选定的课程与当前学生关联起来
+        fetch(`http://localhost:8080/QG_LAST_Web_exploded/course/getQuestion`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => response.json()) // 解析 JSON 格式的响应主体
+            .then(chapter => {
+                totalQuestions = chapter.questions.length;
+                // 处理获取到的章节信息
+                const courseContent = document.getElementById('courseContent');
+                chapter.questions.forEach((question, index) => {
+                    // 创建题目组件并添加到页面
+                    const questionComponent = document.createElement('div');
+                    questionComponent.innerHTML = `
+            <h2>${question.description}</h2>
+            <p>${question.questionType === 'choice' ? '选项: ' + question.options.join(', ') : ''}</p>
+            <input type="text" id="answer${index + 1}">
+            <button onclick="submitAnswer(this,'${question.id}','${question.description}','${question.answer}', ${index})">提交答案</button>
+        `;
+                    courseContent.appendChild(questionComponent);
+                });
+            })
+            .catch(error => {
+                // 处理请求失败的情况
+                console.error('获取章节信息失败!', error);
+            });
+    }
+
+    // 提交答案
+    function submitAnswer(button,questionId,description,correctAnswer) {
+        const userAnswer = document.getElementById(`answer${completedQuestions + 1}`).value;
+        const isCorrect = userAnswer === correctAnswer;
+        completedQuestions++;
+        if(isCorrect){
+            correctTimes++;
+        }
+        alert(isCorrect ? '答案正确！' : '答案错误！');
+        const requestData = {
+            chapterId: chapterId,
+            questionId:questionId,
+            description:description,
+            answer:userAnswer,
+            isCorrect:isCorrect
+        };
+
+        fetch(`http://localhost:8080/QG_LAST_Web_exploded/course/answerSituation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify(requestData)
+        })
+        updateProgress();
+        button.disabled = true; // 禁用当前提交按钮
+        // document.querySelectorAll('button').forEach(button => button.disabled = true); // 禁用所有提交按钮
+    }
+
+    // 更新学习进度
+    function updateProgress() {
+        const progress = document.getElementById('progress');
+        const progressPercentage = Math.round((completedQuestions / totalQuestions) * 100);
+        progress.textContent = `学习进度：${progressPercentage}% (${completedQuestions}/${totalQuestions})`;
+        const accuracy=Math.round((correctTimes/completedQuestions));
+        const requestData={
+            chapterId:chapterId,
+            accuracy:accuracy,
+            complete:completedQuestions
+        }
+        fetch(`http://localhost:8080/QG_LAST_Web_exploded/course/learningSituation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: JSON.stringify(requestData)
+        })
+    }
+</script>
+</body>
+</html>

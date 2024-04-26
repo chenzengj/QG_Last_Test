@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浏览课程</title>
+    <style>
+        .courseDetails {
+            display: none; /* 默认隐藏课程详情 */
+            margin-top: 10px;
+        }
+        .showDetails {
+            cursor: pointer;
+            color: blue;
+        }
+        /* 按钮样式 */
+        .return-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1; /* 确保按钮不会被其他元素遮挡 */
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 返回按钮 -->
+<button class="return-button" onclick="goBack()">返回</button>
+<h1 style="margin-top: 60px;">浏览课程</h1>
+<div id="courseList"></div>
+<!-- 课程列表中的一个课程条目 -->
+
+
+<script>
+    // 发起请求获取课程信息
+    fetch('http://localhost:8080/QG_LAST_Web_exploded/course/getAllSelectCourses')
+        .then(response => response.json())
+        .then(courses => {
+            // 获取课程信息成功后，在页面上显示课程列表
+            const courseList = document.getElementById('courseList');
+            courses.forEach(course => {
+                // 创建课程条目并添加到课程列表中
+                const courseItem = document.createElement('div');
+                courseItem.innerHTML = `
+                        <h2>课程名称：${course.name}</h2>
+                        <p>课程介绍：${course.description}</p>
+                        <p>授课教师: ${course.teacher}</p>
+                        <p>结课时间：${course.endDate}</p>
+                        <p class="showDetails" onclick="toggleDetails(this)">查看详情</p>
+                    <div class="courseDetails">
+                        <h3>章节列表：</h3>
+                        <ul>
+                            ${course.chapters.map(chapter => `<li>${chapter.title}</li> 章节内容：${chapter.content}`).join('')}
+                        </ul>
+
+                    </div>
+                    <button onclick="selectCourse(${course.id})">选择课程</button>
+                    `;
+
+                courseList.appendChild(courseItem);
+            });
+        })
+        .catch(error => {
+            // 获取课程信息失败时，显示错误信息或者进行其他处理
+            console.error('获取课程失败!', error);
+        });
+    // 展开/收起课程详情
+    function toggleDetails(element) {
+        const detailsDiv = element.nextElementSibling;
+        if (detailsDiv.style.display === 'block') {
+            detailsDiv.style.display = 'none';
+            element.textContent = '查看详情';
+        } else {
+            detailsDiv.style.display = 'block';
+            element.textContent = '收起详情';
+        }
+    }
+    function selectCourse(courseId) {
+        // 构建要发送的数据对象
+        const requestData = {
+            courseId: courseId
+        };
+
+        // 发起POST请求
+        $.ajax({
+            url: `http://localhost:8080/QG_LAST_Web_exploded/course/SelectCourse`,
+            type: 'POST',
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify(requestData),
+            success: function(response) {
+                if (response.success) {
+                   alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                // $("#message").html("<p>发生错误,请重试</p>");
+                alert("发生错误，请重试！");
+            }
+        });
+    }
+    function goBack(){
+        window.history.back();
+    }
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</body>
+</html>
