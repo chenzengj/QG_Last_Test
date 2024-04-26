@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+    <title>教师页面</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+<h1>教师个人信息</h1>
+<label for="introduction">个人介绍:</label>
+<textarea type="text" id="introduction" readonly></textarea>
+<label for="email">邮箱:</label>
+<input type="email" id="email" readonly>
+<label for="qq">QQ:</label>
+<input type="text" id="qq" readonly>
+<button id="editBtn">编辑</button>
+<button id="saveBtn">保存</button>
+<div id="result"></div>
+
+<script>
+    $(document).ready(function() {
+        function getTeacherInfo() {
+            $.ajax({
+                url: "http://localhost:8080/QG_LAST_Web_exploded/myServlet/getTeaInfo",
+                type: "GET",
+                success: function(response) {
+                    // 将获取到的学生信息填充到相应的输入框中
+                    $("#introduction").val(response.introduction);
+                    $("#email").val(response.email);
+                    $("#qq").val(response.qq);
+
+                    // 在页面上显示加载成功的消息
+                    //$("#result").html("Student information loaded successfully.");
+                },
+                error: function() {
+                    // 在页面上显示加载失败的消息
+                    $("#result").html("个人信息为空.快来添加个人简介吧~");
+                }
+            });
+        }
+        // 页面加载时获取学生信息列表
+        window.onload = getTeacherInfo();
+            // 编辑按钮点击事件
+            $("#editBtn").click(function() {
+                // 移除只读属性，允许用户编辑个人信息
+                $("#introduction").removeAttr("readonly");
+                $("#email").removeAttr("readonly");
+                $("#qq").removeAttr("readonly");
+
+                // 隐藏编辑按钮，显示保存按钮
+                $("#editBtn").hide();
+                $("#saveBtn").show();
+            });
+
+            // 保存按钮点击事件
+            $("#saveBtn").click(function() {
+                // 获取用户修改后的个人信息
+                // var teacherInfo = {
+                //     introduction: $("#introduction").val(),
+                //     email: $("#email").val(),
+                //     qq: $("#qq").val()
+                // };
+                let introduction= $("#introduction").val();
+                let email= $("#email").val();
+                let qq= $("#qq").val();
+                let teacherInfo =JSON.stringify({
+                    "introduction":introduction,
+                    "email":email,
+                    "qq":qq
+                })
+                // 发送 AJAX 请求保存个人信息
+                $.ajax({
+                    url: "http://localhost:8080/QG_LAST_Web_exploded/myServlet/teacher_introduction",
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    data: teacherInfo,
+                    success: function(response) {
+                        if (response.success) {
+                            $("#result").html("<p>" + response.message + "</p>");
+
+                        } else {
+                            $("#result").html("<p>" + response.message + "</p>");
+                        }
+                    },
+                    error: function() {
+                        $("#result").html("保存失败，请重新尝试.");
+                    }
+                });
+
+                // 添加只读属性，禁止用户继续编辑个人信息
+                $("#introduction").attr("readonly", true);
+                $("#email").attr("readonly", true);
+                $("#qq").attr("readonly", true);
+
+                // 隐藏保存按钮，显示编辑按钮
+                $("#saveBtn").hide();
+                $("#editBtn").show();
+            });
+    });
+</script>
+<a href="course.html">创建课程</a>
+<a href="showCourse.html">展示课程</a>
+<a href="question.html">问题</a>
+<a href="text.html">讨论区</a>
+
+</body>
+</html>

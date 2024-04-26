@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习记录和学习情况</title>
+    <style>
+        /* 添加一些样式来美化页面 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #studyHistory {
+            margin-top: 20px;
+        }
+        #studyHistory table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #studyHistory table th, #studyHistory table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>学生学习情况</h1>
+
+<h2>学习答题情况</h2>
+<div id="studyHistory">
+    <!-- 学习记录将显示在这里 -->
+    <table>
+        <thead>
+        <tr>
+            <th>学生名称</th>
+            <th>已做题目数</th>
+            <th>正确率</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 学习记录的内容将通过 JavaScript 动态添加 -->
+        </tbody>
+    </table>
+</div>
+
+
+
+<script>
+    // 解析 URL 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('courseId');
+    // 在页面加载完成后执行初始化操作
+    window.onload = function() {
+        displayStudyHistory(courseId);
+
+    };
+
+    // 展示学生学习情况
+    function displayStudyHistory(courseId) {
+        // 构建要发送的数据对象
+        const requestData = {
+            courseId: courseId
+        };
+// 发起请求将选定的课程与当前学生关联起来
+        fetch(`http://localhost:8080/QG_LAST_Web_exploded/course/StudentsLearningSituation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => response.json()) // 解析 JSON 格式的响应主体
+            .then(learningProgresses=>{
+                const studyHistoryTable = document.querySelector('#studyHistory table tbody');
+                learningProgresses.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${record.stuName}</td>
+                    <td>${record.questionsAttempted}</td>
+                    <td>${(record.accuracy * 100).toFixed(2)}%</td>
+                `;
+                    studyHistoryTable.appendChild(row);
+                })
+            });
+    }
+</script>
+</body>
+</html>

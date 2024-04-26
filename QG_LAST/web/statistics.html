@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习记录和学习情况</title>
+    <style>
+        /* 添加一些样式来美化页面 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #studyHistory {
+            margin-top: 20px;
+        }
+        #studyHistory table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #studyHistory table th, #studyHistory table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>课程总体学习情况</h1>
+
+
+<div id="studySituation">
+    <!-- 学习情况将显示在这里 -->
+</div>
+
+
+<script>
+    // 解析 URL 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('courseId');
+    // 在页面加载完成后执行初始化操作
+    window.onload = function() {
+        displayStudySituation(courseId);
+    };
+
+    function displayStudySituation() {
+        // 构建要发送的数据对象
+        const requestData = {
+            courseId: courseId
+        };
+// 发起请求将选定的课程与当前学生关联起来
+        fetch(`http://localhost:8080/QG_LAST_Web_exploded/course/total`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => response.json()) // 解析 JSON 格式的响应主体
+            .then(totalSituationJson=> {
+                const studySituationContainer = document.getElementById('studySituation');
+                studySituationContainer.innerHTML = `
+                <p>总章节数：${totalSituationJson.totalChapters}</p>
+                <p>总学生数：${totalSituationJson.totalStudents}</p>
+                <p>总题目数：${totalSituationJson.totalQuestions}</p>
+                <p>平均正确率：${(totalSituationJson.correctRate*100).toFixed(2)}%</p>
+            `;
+            })
+    }
+</script>
+</body>
+</html>

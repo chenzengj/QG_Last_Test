@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>创建课程</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>创建课程</h1>
+    <form id="createCourseForm">
+        <div class="form-group">
+            <label for="courseName">课程名称:</label>
+            <input type="text" id="courseName" name="courseName" required>
+        </div>
+        <div class="form-group">
+            <label for="courseDescription">课程描述:</label>
+            <textarea id="courseDescription" name="courseDescription" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="startDate">开始日期:</label>
+            <input type="date" id="startDate" name="startDate" required>
+        </div>
+        <div class="form-group">
+            <label for="endDate">结束日期:</label>
+            <input type="date" id="endDate" name="endDate" required>
+        </div>
+        <div class="form-group">
+            <label for="maxStudents">最大学生人数:</label>
+            <input type="number" id="maxStudents" name="maxStudents" required>
+        </div>
+        <button type="button" onclick="createCourse()">创建课程</button>
+<!--        <button type="button" onclick="redirectToNewPage()">去创建章节</button>-->
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function createCourse() {
+        let courseData = JSON.stringify({
+            "name": $('#courseName').val(),
+            "description": $('#courseDescription').val(),
+            "startDate": $('#startDate').val(),
+            "endDate": $('#endDate').val(),
+            "maxStudents": $('#maxStudents').val()
+        });
+        $.ajax({
+            url: "http://localhost:8080/QG_LAST_Web_exploded/course/creatCourse",
+            type: "POST",
+            contentType: 'application/json;charset=UTF-8',
+            data: courseData,
+            success: function(response) {
+                if (response.success) {
+                    //$("#message").html("<p>" + response.message + "</p>");
+                    alert(response.message);
+                    setTimeout(function() {
+                        window.location.href = "teacher.html";
+                    }, 1000);
+                    // setTimeout(function() {
+                    //     window.location.href = "chapter.html";
+                    // }, 2000);
+                } else {
+                    alert(response.message);
+                   // $("#message").html("<p>" + response.message + "</p>");
+                }
+            },
+            error: function() {
+                $("#message").html("<p>发生错误,请重试</p>");
+            }
+
+        });
+
+    }
+    function redirectToNewPage() {
+        // 设置新页面的 URL
+        const newPageUrl = "chapter.html";
+        // 使用 window.location.href 属性跳转到新页面
+        window.location.href = newPageUrl;
+    }</script>
+
+</body>
+</html>

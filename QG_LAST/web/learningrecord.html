@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习记录和学习情况</title>
+    <style>
+        /* 添加一些样式来美化页面 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        #studyHistory {
+            margin-top: 20px;
+        }
+        #studyHistory table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #studyHistory table th, #studyHistory table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>学习记录和学习情况</h1>
+
+<h2>学习记录</h2>
+<div id="studyHistory">
+    <!-- 学习记录将显示在这里 -->
+    <table>
+        <thead>
+        <tr>
+            <th>章节名称</th>
+            <th>已做题目数</th>
+            <th>正确率</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 学习记录的内容将通过 JavaScript 动态添加 -->
+        </tbody>
+    </table>
+</div>
+
+<h2>学习情况</h2>
+<div id="studySituation">
+    <!-- 学习情况将显示在这里 -->
+</div>
+
+<script>
+
+    // 在页面加载完成后执行初始化操作
+    window.onload = function() {
+        displayStudyHistory();
+        displayStudySituation();
+    };
+
+    // 展示学习记录
+    function displayStudyHistory() {
+        fetch('http://localhost:8080/QG_LAST_Web_exploded/course/getLearningSituation')
+            .then(response => response.json())
+            .then(learningProgresses=>{
+        const studyHistoryTable = document.querySelector('#studyHistory table tbody');
+        learningProgresses.forEach(record => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${record.chapterName}</td>
+                    <td>${record.questionsAttempted}</td>
+                    <td>${(record.accuracy * 100).toFixed(2)}%</td>
+                `;
+            studyHistoryTable.appendChild(row);
+        })
+        });
+    }
+
+    // 展示学习情况
+    function displayStudySituation() {
+        fetch('http://localhost:8080/QG_LAST_Web_exploded/course/getTotalLearningSituation')
+            .then(response => response.json())
+            .then(totalSituationJson=> {
+                const studySituationContainer = document.getElementById('studySituation');
+                studySituationContainer.innerHTML = `
+                <p>总章节数：${totalSituationJson.totalChapters}</p>
+                <p>总题目数：${totalSituationJson.totalQuestions}</p>
+                <p>正确率：${(totalSituationJson.correctRate*100).toFixed(2)}%</p>
+            `;
+            })
+    }
+</script>
+</body>
+</html>
